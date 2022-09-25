@@ -3,7 +3,8 @@ package xyz.applebox.kotlin.book
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import java.util.concurrent.atomic.AtomicInteger
+import reactor.kotlin.core.publisher.toFlux
+import reactor.kotlin.core.publisher.toMono
 import java.util.concurrent.atomic.AtomicLong
 
 data class Book(
@@ -22,15 +23,15 @@ class BookService {
     )
 
     fun getAll(): Flux<Book> {
-        return Flux.fromIterable(books)
+        return books.toFlux()
     }
 
     fun get(id: Long): Mono<Book> {
-        return Mono.justOrEmpty(books.find { id == it.id })
+        return books.find { id == it.id }.toMono()
     }
 
     fun create(request: Map<String, Any>): Mono<Book> {
-        return Mono.just(request)
+        return request.toMono()
             .map { m ->
                 val book = Book(
                     id = nextId.incrementAndGet(),
@@ -43,7 +44,7 @@ class BookService {
     }
 
     fun delete(id: Long): Mono<Void> {
-        return Mono.justOrEmpty(books.find { it.id == id })
+        return books.find { it.id == id }.toMono()
             .map { books.remove(it) }
             .then()
     }
